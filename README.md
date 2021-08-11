@@ -1,1 +1,2 @@
-5d92c154ec02da69515463c28aaae7577caafb1a
+# gen-automic_rest-from-swagger
+Generate automic_rest python-package from swagger.json
