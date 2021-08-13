@@ -88,29 +88,7 @@ for i in data['paths']:
     if module not in list:
         fl.close()
         list.append(module)
-        #print("--------- create py " + module+'#')
-
-        #filename = module+'.py'
-        #fl = open(package_path+'/'+filename, "w")
-        #fl.write("import os\n")
-        #fl.write("import json\n") 
-        #fl.write("from automic_rest import config\n")
-        #fl.write("import requests\n")
-        #fl.write("from requests.packages.urllib3.exceptions import InsecureRequestWarning\n")
-        #fl.write("\n")
-        #fl.write("requests.packages.urllib3.disable_warnings(InsecureRequestWarning)\n")
-        #fl.write("\n\n")
-        #fl.write("class " + module + ":\n")
-        #fl.write("   def __init__(self):\n")
-        #fl.write("       self.response = None\n")
-        #fl.write("\n")
-        #fl.write("   def json(self):\n")
-        #fl.write("       return  json.loads(self.response)\n")
-        #fl.write("\n")
-        #fl.write("   def text(self):\n")
-        #fl.write("       return  self.response\n")
-        #fl.write("\n")
-
+        
     for  method in data['paths'][i]:
         if 'operationId' in data['paths'][i][method]: 
             operationId = data['paths'][i][method]['operationId']
