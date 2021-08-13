@@ -5,6 +5,13 @@ from shutil import copyfile
 
 
 
+package_name = "automic_rest"
+package_home = "c:\\Users\\xgadyou\\Entwicklung\\GITUB\\"+package_name  
+package_path = package_home+"/"+package_name  
+swagger_json = 'https://docs.automic.com/documentation/webhelp/english/AA/12.3/DOCU/12.3/REST%20API/Automation.Engine/swagger.json'
+
+
+
 def get_path_params(path):
     output = []
     input = path.split('/')
@@ -45,6 +52,7 @@ def create_folder(f):
 def copy_package_files(dst):
     files = ["LICENSE", "README.md", "setup.py"]
     here = os.path.abspath(os.path.dirname(__file__))
+    
     for file in files:
         print("Copy {0} to package".format(file))
         copyfile(here+'/package_files/'+file, dst+'/'+file)
@@ -57,11 +65,6 @@ def copy_package_modules(dst):
         copyfile(here+'/package_files/'+file, dst+'/'+file)
     
     
-
-package_name = "automic_rest"
-package_home = "c:\\Users\\xgadyou\\Entwicklung\\YouDEV/python\\automic\\packages\\"+package_name  
-package_path = package_home+"/"+package_name  
-swagger_json = 'https://docs.automic.com/documentation/webhelp/english/AA/12.3/DOCU/12.3/REST%20API/Automation.Engine/swagger.json'
 
 # MAIN
 create_folder(package_path)
@@ -109,16 +112,15 @@ for i in data['paths']:
                     c +=1    
                     #if 'schema' in el: del parameters[el]['schema']
                 for el in parameters:
-                    print(el['in'])
                     if 'in' in el and el['in'] == 'query':
                         has_query = True
                         #if true get query and build it from vars
-                        print("-- " +operationId + ' has_query '+ el['name'])
+                        #print("-- " +operationId + ' has_query '+ el['name'])
 
                     if 'in' in el and el['in'] == 'body':
                         has_body = True
                         #if true get body
-                        print("-- " +operationId + ' has_body '+ el['name'])
+                        #print("-- " +operationId + ' has_body '+ el['name'])
                     # put query and body in help list
             else:
                 parameters = ''
@@ -139,18 +141,12 @@ for i in data['paths']:
                     else:
                         operationId = operationId+str_list[-2].capitalize()
              
-            #else:
-            #    modules.append(operationId)
             modules.append(operationId)
 
             print(module + ' ' + operationId + ' ' + method + ' ' + i)
             filename = operationId.lower()+'.py'
             fl = open(package_path+'/'+filename, "w")
       
-
-
-
-
             fl.write("import os\n")
             fl.write("import json\n") 
             fl.write("from automic_rest import config\n")
@@ -164,7 +160,6 @@ for i in data['paths']:
             
             fl.write("\n\n")
             fl.write("class " + operationId + ":\n")
-            #print(get_path_params('/{client_id}/system/agents/{object_name}'))
             
             if method == 'get':
                 if operationId == "ping":
@@ -201,18 +196,22 @@ for i in data['paths']:
             fl.write("       self.request() \n")
             fl.write("\n")
             fl.write("   def request(self): \n")
-            if method == 'post':
-                fl.write("       requests_headers = {'Content-type': 'application/json', 'Accept': 'application/json'}\n")
+            #if method == 'post':
+            fl.write("       requests_headers = {\n")
+            fl.write("                              'Content-type': 'application/json', \n")
+            fl.write("                              'Accept': 'application/json', \n")
+            fl.write("                              'Authorization' : \"Basic %s\" % config().base64auth \n")
+            fl.write("       }\n")
             fl.write("       try: \n")
             fl.write("            r = requests."+method+"(\n")
             if has_query:      
                 fl.write("                config().url+self.path+self.query, \n")
             else:
                 fl.write("                config().url+self.path, \n")
+            fl.write("                headers=requests_headers,\n")
             if method == 'post':
-                fl.write("                headers=requests_headers,\n")
                 fl.write("                data=json.dumps(self.bodydata),\n")
-            fl.write("                auth=(config().userid, config().password), \n")
+            #fl.write("                auth=(config().userid, config().password), \n")
             fl.write("                verify=config().sslverify, \n")
             fl.write("                timeout=config().timeout \n")
             fl.write("            ) \n")
@@ -231,8 +230,6 @@ for i in data['paths']:
                 fl.write("            self.response = r.json() \n")
                 fl.write("            # http status_code \n")
             fl.write("            self.status = r.status_code \n")
-            
-
             fl.write("            # If the response was successful, no Exception will be raised \n")
             fl.write("            r.raise_for_status() \n")
             fl.write("       except HTTPError as http_err: \n")
@@ -247,41 +244,6 @@ for i in data['paths']:
             fl.write("       \n")
             fl.write("       return  self \n")
 
-
-
-#
-            #fl.write("import os\n")
-            #fl.write("import json\n") 
-            #fl.write("from automic_rest import config\n")
-            #fl.write("import requests\n")
-            #fl.write("from requests.packages.urllib3.exceptions import InsecureRequestWarning\n")
-            #fl.write("\n")
-            #fl.write("requests.packages.urllib3.disable_warnings(InsecureRequestWarning)\n")
-            #fl.write("\n\n")
-            #fl.write("class " + operationId + ":\n")
-            #fl.write("   def __init__(self, **kwargs):\n")
-            #fl.write('       """ Summary: ' + summary +'"""\n')
-            #fl.write("       self.path = config().setArgs('"+i+"', **kwargs)\n")
-            #if method == 'post':
-            #    fl.write("       self.data = kwargs.get('data',\"{}\")\n")
-            #fl.write("       self.request()\n")
-            #fl.write("\n")
-            #fl.write("   def json(self):\n")
-            #fl.write("       return  json.loads(self.response)\n")
-            #fl.write("\n")
-            #fl.write("   def request(self, **kwargs):\n")
-            #if method == 'post':
-            #    fl.write("       headers = {'Content-type': 'application/json', 'Accept': 'application/json'}\n")
-            #fl.write("       r = requests."+method+"(\n")
-            #fl.write("           config().url+self.path,\n")
-            #if method == 'post':
-            #    fl.write("           headers=headers,\n")
-            #    fl.write("           data=json.dumps(self.data),\n") 
-            #fl.write("           auth=(config().userid, config().password),\n")
-            #fl.write("           verify=config().sslverify\n")
-            #fl.write("       )\n")
-            #fl.write("\n")
-            #fl.write("       return json.loads(r.text)\n\n")
             if module not in help_list:
                 help_list[module] = {}
             help_list[module][operationId] = {"path": i, "method": method, "summary": summary, "parameters": parameters}
@@ -300,9 +262,6 @@ f.close()
 f = open(package_path+'/__init__.py', "w")
 f.write("from automic_rest.connection import connection, config \n")
 f.write("from automic_rest.help import help \n")
-
-#for mod in list:
-#    f.write("from automic_rest."+mod+" import "+mod+" \n")
 
 for mod in modules:
     f.write("from automic_rest."+mod.lower()+" import "+mod+" \n")
